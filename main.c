@@ -47,7 +47,7 @@ int main(int argc, char *argv[]){
         print_usage_and_quit(argv[0]);
     }
     else if(file){
-        if((writeout = open(option_input, O_WRONLY|O_APPEND|O_CREAT, S_IROTH)) < 0){
+        if((writeout = open(option_input, O_WRONLY|O_APPEND|O_CREAT, S_IROTH | S_IRUSR | S_IWUSR | S_IRGRP)) < 0){
             printf("Error opening file %s: %s\n", argv[2], strerror(errno));
             return 1;
         }
