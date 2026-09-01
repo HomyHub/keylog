@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <errno.h>
 #include <string.h>
 #include "keylogger.h"
 
@@ -146,6 +147,20 @@ void keylogger(int keyboard, int writeout){
 
     while(loop){
         bytesRead = read(keyboard, events, eventSize * NUM_EVENTS);
+
+        /* read() returns <0 (ENODEV) or 0 (EOF) when the USB scanner is
+         * unplugged / re-enumerates. Without this the loop would busy-spin
+         * forever on the dead fd and keylog_watch would never restart us to
+         * re-detect the reconnected device. Exit cleanly so it does. */
+        if(bytesRead < 0){
+            if(errno == EINTR){
+                continue;
+            }
+            break; /* device unplugged (ENODEV) */
+        }
+        if(bytesRead == 0){
+            break; /* EOF — device removed */
+        }
 
         for(i = 0; i < (bytesRead / eventSize); ++i){
             if(events[i].type == EV_KEY){
