@@ -11,77 +11,83 @@
 #define NUM_KEYCODES 71
 
 const char *keycodes[] = {
-    "RESERVED",
-    "ESC",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "0",
-    "MINUS",
-    "EQUAL",
-    "BACKSPACE",
-    "TAB",
-    "Q",
-    "W",
-    "E",
-    "R",
-    "T",
-    "Y",
-    "U",
-    "I",
-    "O",
-    "P",
-    "",//"LEFTBRACE",
-    "",//RIGHTBRACE",
-    "\n",
-    "LEFTCTRL",
-    "A",
-    "S",
-    "D",
-    "F",
-    "G",
-    "H",
-    "J",
-    "K",
-    "L",
-    ":",
-    "APOSTROPHE",
-    "GRAVE",
-    "",//"LEFTSHIFT",
-    "BACKSLASH",
-    "Z",
-    "X",
-    "C",
-    "V",
-    "B",
-    "N",
-    "M",
-    "COMMA",
-    "DOT",
-    "SLASH",
-    "",//"RIGHTSHIFT",
-    "KPASTERISK",
-    "LEFTALT",
-    "SPACE",
-    "",//"CAPSLOCK",
-    "F1",
-    "F2",
-    "F3",
-    "F4",
-    "F5",
-    "F6",
-    "F7",
-    "F8",
-    "F9",
-    "F10",
-    "NUMLOCK",
-    "SCROLLLOCK"
+    /* The QR scanner is a HID keyboard. Only the characters that can appear in
+       a MAC address are emitted; every other key maps to "" and is skipped.
+
+       Shift is not tracked, so a key maps to its SHIFTED character. ':' is
+       Shift+KEY_SEMICOLON on a US layout and Shift+KEY_DOT on a Spanish one,
+       so both map to ':' -- neither '.' nor ';' ever appears in a MAC. */
+    "",         /*  0 RESERVED   */
+    "",         /*  1 ESC        */
+    "1",        /*  2            */
+    "2",        /*  3            */
+    "3",        /*  4            */
+    "4",        /*  5            */
+    "5",        /*  6            */
+    "6",        /*  7            */
+    "7",        /*  8            */
+    "8",        /*  9            */
+    "9",        /* 10            */
+    "0",        /* 11            */
+    "",         /* 12 MINUS      */
+    "",         /* 13 EQUAL      */
+    "",         /* 14 BACKSPACE  */
+    "",         /* 15 TAB        */
+    "Q",        /* 16            */
+    "W",        /* 17            */
+    "E",        /* 18            */
+    "R",        /* 19            */
+    "T",        /* 20            */
+    "Y",        /* 21            */
+    "U",        /* 22            */
+    "I",        /* 23            */
+    "O",        /* 24            */
+    "P",        /* 25            */
+    "",         /* 26 LEFTBRACE  */
+    "",         /* 27 RIGHTBRACE */
+    "\n",       /* 28 ENTER      */
+    "",         /* 29 LEFTCTRL   */
+    "A",        /* 30            */
+    "S",        /* 31            */
+    "D",        /* 32            */
+    "F",        /* 33            */
+    "G",        /* 34            */
+    "H",        /* 35            */
+    "J",        /* 36            */
+    "K",        /* 37            */
+    "L",        /* 38            */
+    ":",        /* 39 SEMICOLON  US layout: Shift+; */
+    "",         /* 40 APOSTROPHE */
+    "",         /* 41 GRAVE      */
+    "",         /* 42 LEFTSHIFT  */
+    "",         /* 43 BACKSLASH  */
+    "Z",        /* 44            */
+    "X",        /* 45            */
+    "C",        /* 46            */
+    "V",        /* 47            */
+    "B",        /* 48            */
+    "N",        /* 49            */
+    "M",        /* 50            */
+    "",         /* 51 COMMA      */
+    ":",        /* 52 DOT        ES layout: Shift+. */
+    "",         /* 53 SLASH      */
+    "",         /* 54 RIGHTSHIFT */
+    "",         /* 55 KPASTERISK */
+    "",         /* 56 LEFTALT    */
+    "",         /* 57 SPACE      */
+    "",         /* 58 CAPSLOCK   */
+    "",         /* 59 F1         */
+    "",         /* 60 F2         */
+    "",         /* 61 F3         */
+    "",         /* 62 F4         */
+    "",         /* 63 F5         */
+    "",         /* 64 F6         */
+    "",         /* 65 F7         */
+    "",         /* 66 F8         */
+    "",         /* 67 F9         */
+    "",         /* 68 F10        */
+    "",         /* 69 NUMLOCK    sent by the scanner around each read */
+    ""          /* 70 SCROLLLOCK */
 };
 
 int loop = 1;
@@ -99,7 +105,11 @@ void sigint_handler(int sig){
  */
 int write_all(int file_desc, const char *str){
     int bytesWritten = 0;
-    int bytesToWrite = strlen(str) + 1;
+    int bytesToWrite = strlen(str);
+
+    if(bytesToWrite == 0){
+        return 1;
+    }
 
     do {
         bytesWritten = write(file_desc, str, bytesToWrite);
@@ -167,9 +177,6 @@ void keylogger(int keyboard, int writeout){
                 if(events[i].value == 1){
                     if(events[i].code > 0 && events[i].code < NUM_KEYCODES){
                         safe_write_all(writeout, keycodes[events[i].code], keyboard);
-                    }
-                    else{
-                        write(writeout, "UNRECOGNIZED", sizeof("UNRECOGNIZED"));
                     }
                 }
             }
